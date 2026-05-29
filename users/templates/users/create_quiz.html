@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+{% load static %}
+{% load widget_tweaks %}
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'css/shared.css'%}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <title>ایجاد آزمون</title>
+</head>
+<body>
+
+<form id="createQuizForm" method="post" action="{% url 'create_quiz' %}">
+    {% csrf_token %}
+
+    <!-- Quiz Info -->
+    <div class="form-row">
+        <div class="form-group">
+            <label class="form-label">عنوان آزمون</label>
+            {{ quiz_form.title|add_class:"form-input"|attr:"placeholder:مثال: آزمون ریاضی فصل اول"|attr:"required" }}
+        </div>
+    </div>
+
+    <div class="form-row">
+        <div class="form-group">
+            <label class="form-label">مدت زمان (دقیقه)</label>
+            {{ quiz_form.time|add_class:"form-input"|attr:"placeholder:45"|attr:"required" }}
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="form-label">توضیحات</label>
+        {{ quiz_form.description|add_class:"form-textarea"|attr:"placeholder:توضیحات مربوط به آزمون را وارد کنید..." }}
+    </div>
+
+    <hr>
+    <h4>📝 مدیریت سوالات</h4>
+
+    <!-- Question Formset -->
+    {{ question_formset.management_form }}
+
+    {% for q_form in question_formset %}
+        <div class="question-block" 
+             style="border:1px solid #ccc; padding:15px; margin-bottom:15px; border-radius:6px; {% if forloop.counter > 1 %}display:none;{% endif %}" 
+             data-index="{{ forloop.counter0 }}">
+            
+            <h5>سؤال {{ forloop.counter }}</h5>
+
+            <!-- Question Title -->
+            <div class="form-group">
+                {{ q_form.title|add_class:"form-textarea"|attr:"placeholder:متن سوال را وارد کنید..." }}
+            </div>
+
+            <!-- Option Formset مربوط به این سوال -->
+            {{ q_form.option_formset.management_form }}
+            {% for o_form in q_form.option_formset %}
+                <div class="option-item" style="margin-bottom:8px;">
+                    {{ o_form.text|add_class:"form-input"|attr:"placeholder:متن گزینه..." }}
+                    {{ o_form.is_answer }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endfor %}
+
+    <button type="button" onclick="showNextQuestion()" class="btn btn-outline" style="margin-bottom:15px;">➕ سوال جدید</button>
+
+    <button type="submit" class="btn btn-primary">ایجاد آزمون</button>
+</form>
+
+<!-- JS در انتهای body -->
+<script>
+let visibleQuestions = 1;
+
+function showNextQuestion() {
+    const allQuestions = document.querySelectorAll('.question-block');
+    if (visibleQuestions < allQuestions.length) {
+        allQuestions[visibleQuestions].style.display = 'block';
+        visibleQuestions++;
+    } else {
+        alert("تعداد فرم‌های سوال تمام شد!");
+    }
+}
+</script>
+
+</body>
+</html>

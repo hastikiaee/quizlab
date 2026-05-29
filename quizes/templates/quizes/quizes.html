@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+{%  load static %}
+{% load quizes %}
+{% quizes as quizes %}
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>آزمون‌ها - آزمون آنلاین</title>
+    <link rel="stylesheet" href="{% static 'css/shared.css' %}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .quiz-session {
+            display: none;
+        }
+        
+        .quiz-session.active {
+            display: block;
+        }
+        
+        .quiz-header-bar {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .quiz-controls {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .timer {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        .timer.warning {
+            color: var(--error);
+        }
+        
+        .quiz-options {
+            margin: 1rem 0;
+        }
+        
+        .option-label {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .option-label:hover {
+            background: var(--muted);
+        }
+        
+        .quiz-navigation {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 2rem;
+        }
+        
+        .question-numbers {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .question-num {
+            width: 2rem;
+            height: 2rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background: transparent;
+            color: var(--foreground);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+        }
+        
+        .question-num.active {
+            background: var(--primary);
+            color: var(--primary-foreground);
+        }
+        
+        .question-num.answered {
+            background: var(--secondary);
+            color: var(--secondary-foreground);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    {% include 'users/navbar.html' %}
+
+    <main class="main">
+        <div class="container">
+            <!-- Quiz Selection -->
+            <div id="quiz-selection">
+                <div class="page-header">
+                    <i class="fas fa-play header-icon"></i>
+                    <h1>آزمون‌ها</h1>
+                    <p>آزمون مورد نظر خود را انتخاب کنید</p>
+                </div>
+                {%for quiz in quizes %}
+                <div class="quiz-grid">
+                    <div class="quiz-card">
+                        <div class="quiz-header">
+                            <div class="quiz-info">
+                                <h3>{{quiz.title}}</h3>
+                                <p>{{quiz.description}}</p>
+                            </div>
+                            
+                        </div>
+                        <div class="quiz-details">
+                            <div class="detail-row">
+                                <span><i class="fas fa-clock"></i>{{quiz.time}}</span>
+                                <span>{{quiz.numquestions}} سوال</span>
+                            </div>
+                        </div>
+                        <a href="{% url 'quize-submit' quiz.id %}" class="btn btn-primary full-width">
+                            <i class="fas fa-play"></i>
+                            شروع آزمون
+                        </a>
+                    </div>
+                {%endfor%}
+                </div>
+            </div>
+
+            <!-- Quiz Session -->
+            <div id="quiz-session" class="quiz-session">
+                <div class="quiz-header-bar">
+                    <div class="quiz-info">
+                        <h2 id="quiz-session-title">آزمون ریاضی</h2>
+                        <p id="quiz-progress">سوال ۱ از ۳</p>
+                    </div>
+                    <div class="quiz-controls">
+                        <div class="timer">
+                            <i class="fas fa-clock"></i>
+                            <span id="timer-display">20:00</span>
+                        </div>
+                        <button class="btn btn-outline" onclick="exitQuiz()">انصراف</button>
+                    </div>
+                </div>
+                
+                <div class="progress-bar">
+                    <div class="progress-fill" id="quiz-progress-bar" style="width: 33%"></div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 id="current-question-title">سوال ۱</h3>
+                    </div>
+                    <div class="card-content">
+                        <h4 id="question-text">حاصل ۲ + ۲ چقدر است؟</h4>
+                        
+                        <div class="quiz-options" id="quiz-options">
+                            <label class="option-label">
+                                <input type="radio" name="answer" value="0">
+                                <span class="option-text">۳</span>
+                            </label>
+                            <label class="option-label">
+                                <input type="radio" name="answer" value="1">
+                                <span class="option-text">۴</span>
+                            </label>
+                            <label class="option-label">
+                                <input type="radio" name="answer" value="2">
+                                <span class="option-text">۵</span>
+                            </label>
+                            <label class="option-label">
+                                <input type="radio" name="answer" value="3">
+                                <span class="option-text">۶</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="quiz-navigation">
+                    <button class="btn btn-outline" id="prev-btn" onclick="prevQuestion()" disabled>
+                        <i class="fas fa-arrow-right"></i>
+                        سوال قبل
+                    </button>
+                    
+                    <div class="question-numbers" id="question-nav">
+                        <button class="question-num active">۱</button>
+                        <button class="question-num">۲</button>
+                        <button class="question-num">۳</button>
+                    </div>
+
+                    <button class="btn btn-primary" id="next-btn" onclick="nextQuestion()">
+                        سوال بعد
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- User Type Switcher -->
+
+
+    <script src="navigation.js"></script>
+    <script>
+        // Quiz data
+        const quizzes = {
+            'math': {
+                title: 'آزمون ریاضی',
+                duration: 3, // minutes for demo
+                questions: [
+                    {
+                        id: 1,
+                        question: "حاصل ۲ + ۲ چقدر است؟",
+                        options: ["۳", "۴", "۵", "۶"],
+                        correctAnswer: 1
+                    },
+                    {
+                        id: 2,
+                        question: "کدام عدد اول است؟",
+                        options: ["۴", "۶", "۷", "۸"],
+                        correctAnswer: 2
+                    },
+                    {
+                        id: 3,
+                        question: "حاصل ۳ × ۴ چقدر است؟",
+                        options: ["۱۰", "۱۱", "۱۲", "۱۳"],
+                        correctAnswer: 2
+                    }
+                ]
+            },
+            'physics': {
+                title: 'آزمون فیزیک',
+                duration: 2,
+                questions: [
+                    {
+                        id: 1,
+                        question: "اولین قانون نیوتن چیست؟",
+                        options: ["قانون اینرسی", "قانون شتاب", "قانون عکس‌العمل", "قانون جاذبه"],
+                        correctAnswer: 0
+                    },
+                    {
+                        id: 2,
+                        question: "واحد نیرو در SI چیست؟",
+                        options: ["ژول", "نیوتن", "وات", "پاسکال"],
+                        correctAnswer: 1
+                    }
+                ]
+            }
+        };
+
+        let currentQuizData = null;
+        let currentQuestionIndex = 0;
+        let quizAnswers = {};
+        let quizTimer = null;
+        let timeLeft = 0;
+
+        function startQuizSession(quizType) {
+            currentQuizData = quizzes[quizType];
+            if (!currentQuizData) return;
+            
+            currentQuestionIndex = 0;
+            quizAnswers = {};
+            timeLeft = currentQuizData.duration * 60; // Convert to seconds
+            
+            document.getElementById('quiz-session-title').textContent = currentQuizData.title;
+            document.getElementById('quiz-selection').style.display = 'none';
+            document.getElementById('quiz-session').classList.add('active');
+            
+            updateQuizDisplay();
+            startTimer();
+        }
+
+        function updateQuizDisplay() {
+            if (!currentQuizData) return;
+            
+            const question = currentQuizData.questions[currentQuestionIndex];
+            const totalQuestions = currentQuizData.questions.length;
+            
+            // Update progress
+            document.getElementById('quiz-progress').textContent = `سوال ${currentQuestionIndex + 1} از ${totalQuestions}`;
+            document.getElementById('quiz-progress-bar').style.width = `${((currentQuestionIndex + 1) / totalQuestions) * 100}%`;
+            
+            // Update question
+            document.getElementById('current-question-title').textContent = `سوال ${question.id}`;
+            document.getElementById('question-text').textContent = question.question;
+            
+            // Update options
+            const optionsContainer = document.getElementById('quiz-options');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const label = document.createElement('label');
+                label.className = 'option-label';
+                
+                const radio = document.createElement('input');
+                radio.type = 'radio';
+                radio.name = 'answer';
+                radio.value = index;
+                
+                if (quizAnswers[question.id] === index) {
+                    radio.checked = true;
+                }
+                
+                radio.addEventListener('change', () => {
+                    quizAnswers[question.id] = index;
+                    updateQuestionNavigation();
+                });
+                
+                const span = document.createElement('span');
+                span.className = 'option-text';
+                span.textContent = option;
+                
+                label.appendChild(radio);
+                label.appendChild(span);
+                optionsContainer.appendChild(label);
+            });
+            
+            updateQuestionNavigation();
+            updateNavigationButtons();
+        }
+
+        function updateQuestionNavigation() {
+            const navContainer = document.getElementById('question-nav');
+            navContainer.innerHTML = '';
+            
+            currentQuizData.questions.forEach((_, index) => {
+                const button = document.createElement('button');
+                button.className = 'question-num';
+                button.textContent = index + 1;
+                
+                if (index === currentQuestionIndex) {
+                    button.classList.add('active');
+                }
+                
+                if (quizAnswers[currentQuizData.questions[index].id] !== undefined) {
+                    button.classList.add('answered');
+                }
+                
+                button.addEventListener('click', () => {
+                    currentQuestionIndex = index;
+                    updateQuizDisplay();
+                });
+                
+                navContainer.appendChild(button);
+            });
+        }
+
+        function updateNavigationButtons() {
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+            
+            prevBtn.disabled = currentQuestionIndex === 0;
+            
+            if (currentQuestionIndex === currentQuizData.questions.length - 1) {
+                nextBtn.innerHTML = 'اتمام آزمون <i class="fas fa-check-circle"></i>';
+                nextBtn.onclick = finishQuiz;
+            } else {
+                nextBtn.innerHTML = 'سوال بعد <i class="fas fa-arrow-left"></i>';
+                nextBtn.onclick = nextQuestion;
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                updateQuizDisplay();
+            }
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < currentQuizData.questions.length - 1) {
+                currentQuestionIndex++;
+                updateQuizDisplay();
+            }
+        }
+
+        function startTimer() {
+            if (quizTimer) clearInterval(quizTimer);
+            
+            quizTimer = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                
+                if (timeLeft <= 0) {
+                    finishQuiz();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            const display = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            const timerElement = document.getElementById('timer-display');
+            timerElement.textContent = display;
+            
+            if (timeLeft < 60) {
+                timerElement.parentElement.classList.add('warning');
+            }
+        }
+
+        function finishQuiz() {
+            if (quizTimer) {
+                clearInterval(quizTimer);
+                quizTimer = null;
+            }
+            
+            showQuizResults();
+        }
+
+        function showQuizResults() {
+            let correctCount = 0;
+            currentQuizData.questions.forEach(question => {
+                if (quizAnswers[question.id] === question.correctAnswer) {
+                    correctCount++;
+                }
+            });
+            
+            const score = Math.round((correctCount / currentQuizData.questions.length) * 100);
+            const timeSpent = currentQuizData.duration * 60 - timeLeft;
+            
+            alert(`آزمون تمام شد!\nنمره شما: ${score}%\nپاسخ‌های صحیح: ${correctCount}/${currentQuizData.questions.length}`);
+            
+            // Reset and go back to selection
+            document.getElementById('quiz-session').classList.remove('active');
+            document.getElementById('quiz-selection').style.display = 'block';
+        }
+
+        function exitQuiz() {
+            if (quizTimer) {
+                clearInterval(quizTimer);
+                quizTimer = null;
+            }
+            
+            if (confirm('آیا مطمئن هستید که می‌خواهید از آزمون خارج شوید؟')) {
+                document.getElementById('quiz-session').classList.remove('active');
+                document.getElementById('quiz-selection').style.display = 'block';
+            } else {
+                if (currentQuizData && timeLeft > 0) {
+                    startTimer();
+                }
+            }
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(event) {
+            if (document.getElementById('quiz-session').classList.contains('active')) {
+                switch(event.key) {
+                    case 'ArrowLeft':
+                        if (event.ctrlKey) nextQuestion();
+                        break;
+                    case 'ArrowRight':
+                        if (event.ctrlKey) prevQuestion();
+                        break;
+                    case '1':
+                    case '2':
+                    case '3':
+                    case '4':
+                        if (!event.ctrlKey && !event.altKey) {
+                            const optionIndex = parseInt(event.key) - 1;
+                            const radio = document.querySelector(`input[name="answer"][value="${optionIndex}"]`);
+                            if (radio) {
+                                radio.checked = true;
+                                const questionId = currentQuizData.questions[currentQuestionIndex].id;
+                                quizAnswers[questionId] = optionIndex;
+                                updateQuestionNavigation();
+                            }
+                        }
+                        break;
+                }
+            }
+        });
+    </script>
+</body>
+</html>

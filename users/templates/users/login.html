@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8" />
+    <title>ورود کاربران</title>
+    <style>
+        body {
+            font-family: Tahoma, sans-serif;
+            background: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .login-container {
+            background: white;
+            padding: 2rem 3rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            width: 320px;
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            color: #333;
+        }
+        label {
+            display: block;
+            margin-top: 1rem;
+            font-weight: bold;
+            color: #555;
+        }
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 8px 10px;
+            margin-top: 0.3rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .errorlist {
+            color: #b00020;
+            margin: 0.5rem 0 0;
+            list-style-type: none;
+            padding: 0;
+            font-size: 0.9rem;
+        }
+        .message {
+            margin-top: 1rem;
+            color: green;
+            text-align: center;
+            font-weight: bold;
+        }
+        .error-message {
+            margin-top: 1rem;
+            color: #b00020;
+            text-align: center;
+            font-weight: bold;
+        }
+        button {
+            margin-top: 1.5rem;
+            width: 100%;
+            padding: 10px;
+            background-color: #287bff;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #1a5de0;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h2>ورود به حساب کاربری</h2>
+        <form method="POST" novalidate>
+            {% csrf_token %}
+
+            {# خطاهای کلی فرم (مثلاً نام کاربری یا رمز اشتباه) #}
+            {% if form.non_field_errors %}
+                <ul class="errorlist">
+                {% for error in form.non_field_errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+
+            <label for="{{ form.username.id_for_label }}">نام کاربری</label>
+            {{ form.username }}
+
+            <label for="{{ form.password.id_for_label }}">رمز عبور</label>
+            {{ form.password }}
+
+            <button type="submit">ورود</button>
+
+            {# پیام موفقیت یا خطای دلخواه از ویو #}
+            {% if message %}
+                <p class="{% if message == 'success' %}message{% else %}error-message{% endif %}">{{ message }}</p>
+            {% endif %}
+        </form>
+    </div>
+</body>
+</html>

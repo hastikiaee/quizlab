@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+{%load static%}
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>جزئیات کارنامه - آزمون آنلاین</title>
+    <link rel="stylesheet" href="{%static 'css/shared.css'%}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .results-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 2rem;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .result-item .result-value {
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .result-item .result-label {
+            font-size: 0.875rem;
+            color: var(--muted-foreground);
+        }
+        
+        .progress-section {
+            margin-top: 2rem;
+        }
+        
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+        }
+        
+        .questions-review {
+            space: 1.5rem;
+        }
+        
+        .question-item {
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .question-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+        
+        .question-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--radius);
+            font-size: 0.875rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            white-space: nowrap;
+        }
+        
+        .question-badge.correct {
+            background: #dcfce7;
+            color: #166534;
+        }
+        
+        .question-badge.incorrect {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .question-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 0.5rem;
+        }
+        
+        .option {
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background: #f9fafb;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .option.correct {
+            background: #dcfce7;
+            border-color: #22c55e;
+            color: #166534;
+        }
+        
+        .option.user-answer {
+            background: #fee2e2;
+            border-color: #ef4444;
+            color: #991b1b;
+        }
+        
+        .option-label {
+            font-size: 0.75rem;
+            padding: 0.125rem 0.5rem;
+            border-radius: var(--radius);
+            font-weight: 500;
+        }
+        
+        .option.correct .option-label {
+            background: #166534;
+            color: white;
+        }
+        
+        .option.user-answer .option-label {
+            background: #991b1b;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    {% include 'navbar.html' %}
+
+    <main class="main">
+        <div class="container">
+            <!-- Header -->
+            <div class="flex items-center gap-4 mb-6">
+                <button class="btn btn-outline" onclick="goBackToDashboard()">
+                    <i class="fas fa-arrow-right"></i>
+                    بازگشت
+                </button>
+                <h1 id="report-title" style="font-size: 1.5rem;">{{quizresult.quiz.title}}</h1>
+            </div>
+
+            <!-- Summary Card -->
+            <div class="card gradient-bg">
+                <div class="card-header">
+                    <h3>
+                        <i class="fas fa-trophy"></i>
+                        خلاصه نتایج
+                    </h3>
+                </div>
+                <div class="card-content">
+                    <div class="results-summary">
+                        <div class="result-item">
+                            <div class="result-value">{{quizresult.percent}}%</div>
+                            <div class="result-label">نمره کل</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="result-value">{{quizresult.score}}/{{quizresult.num_questions}}</div>
+                            <div class="result-label">پاسخ صحیح</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="result-value">#{{quizresult.rank}}</div>
+                            <div class="result-label">رنک شما</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="result-value">{{quizresult.time}}</div>
+                            <div class="result-label">زمان صرف شده</div>
+                        </div>
+                    </div>
+                    
+                    <div class="progress-section">
+                        <div class="progress-label">
+                            <span>درصد موفقیت</span>
+                            <span>{{quizresult.percent}}%</span>
+                        </div>
+                        <div class="progress-bar large">
+                            <div class="progress-fill" style="width: {{quizresult.percent}}%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Questions Review -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>
+                        <i class="fas fa-target"></i>
+                        بررسی سوالات
+                    </h3>
+                </div>
+                <div class="card-content">
+                    <div class="questions-review">
+                        {% for q in questions%}
+                        <div class="question-item">
+                            <div class="question-header">
+                                {%if q.is_correct %}
+                                <span class="question-badge correct">
+                                    <i class="fas fa-check-circle"></i>
+                                    {{q.is_correct}}
+                                </span>
+                                {%else %}
+                                <span class="question-badge correct">
+                                    <i class="fas fa-times-circle"></i>
+                                    {{q.is_correct}}
+                                </span>
+                                {% endif %}
+                                <h4>{{q.title}}</h4>
+                            </div>
+                            <div class="question-options">
+                                {% for o in q.options %}
+
+                                <div class="option {% if o.is_answer %}correct{% elif o.is_choosen %}user-answer{% endif %}">
+                                    {{o.id}}.   {{o.text}}
+                                    {% if o.is_answer %}
+                                    <span class="option-label">پاسخ صحیح</span>
+                                    {% elif o.is_choosen %}
+                                    <span class="option-label">پاسخ شما</span>
+                                    {% endif %}
+                                    
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Performance Analysis -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>
+                        <i class="fas fa-chart-bar"></i>
+                        تحلیل عملکرد
+                    </h3>
+                </div>
+                <div class="card-content">
+                    <div class="grid grid-2">
+                        <div>
+                            <h4 style="margin-bottom: 1rem;">نقاط قوت</h4>
+                            <ul style="list-style: none; padding: 0;">
+                                <li style="margin-bottom: 0.5rem; color: var(--green);">
+                                    <i class="fas fa-check-circle"></i>
+                                    محاسبات ساده
+                                </li>
+                                <li style="margin-bottom: 0.5rem; color: var(--green);">
+                                    <i class="fas fa-check-circle"></i>
+                                    ضرب اعداد
+                                </li>
+                                <li style="margin-bottom: 0.5rem; color: var(--green);">
+                                    <i class="fas fa-check-circle"></i>
+                                    ریشه‌گیری
+                                </li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 style="margin-bottom: 1rem;">نقاط ضعف</h4>
+                            <ul style="list-style: none; padding: 0;">
+                                <li style="margin-bottom: 0.5rem; color: var(--error);">
+                                    <i class="fas fa-times-circle"></i>
+                                    تشخیص اعداد اول
+                                </li>
+                                <li style="margin-bottom: 0.5rem; color: var(--error);">
+                                    <i class="fas fa-times-circle"></i>
+                                    اعداد زوج و فرد
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="text-center mt-6">
+                <a href="{% url 'student_dashboard' %}" class="btn btn-primary">
+                    بازگشت به داشبورد
+                </a>
+                <a href="quiz.html" class="btn btn-outline">
+                    شرکت در آزمون جدید
+                </a>
+            </div>
+        </div>
+    </main>
+
+    
+
+    <script src="{% static "js/navigation.js" %}"></script>
+
+   
+</body>
+</html>

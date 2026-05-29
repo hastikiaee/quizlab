@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+{%load static%}
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>رنکینگ - آزمون آنلاین</title>
+    <link rel="stylesheet" href="{%static 'css/shared.css'%}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex: 1;
+        }
+        
+        .user-stats {
+            display: flex;
+            gap: 2rem;
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat .value {
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        .stat .label {
+            font-size: 0.75rem;
+            color: var(--muted-foreground);
+        }
+        
+        .rank-badge:not(.first):not(.second):not(.third) {
+            background: #dbeafe;
+            color: #1d4ed8;
+            border: 1px solid #93c5fd;
+        }
+        
+        .podium-user .avatar {
+            width: 4rem;
+            height: 4rem;
+            margin: 0 auto 0.5rem;
+            border: 3px solid;
+        }
+        
+        .podium-place.first .avatar {
+            border-color: #fbbf24;
+            width: 5rem;
+            height: 5rem;
+            font-size: 1.5rem;
+        }
+        
+        .podium-place.second .avatar {
+            border-color: #d1d5db;
+        }
+        
+        .podium-place.third .avatar {
+            border-color: #fb923c;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    {% include 'users/navbar.html' %}
+
+    <main class="main">
+        <div class="container">
+            <div class="page-header">
+                <i class="fas fa-trophy header-icon"></i>
+                <h1>رنکینگ کاربران</h1>
+                <p>بهترین دانشجویان را بشناسید و الهام بگیرید</p>
+            </div>
+
+            <!-- Podium -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>سکوی افتخار</h3>
+                </div>
+                <div class="card-content">
+                    <div class="podium">
+                        {% for report in reports|slice:":3" %}
+                            <div class="podium-place {% if forloop.counter == 1 %}first{% elif forloop.counter == 2 %}second{% else %}third{% endif %}">
+                                <div class="podium-base">
+                                    {% if forloop.counter == 1 %}
+                                        <i class="fas fa-crown"></i>
+                                    {% elif forloop.counter == 2 %}
+                                        <i class="fas fa-medal"></i>
+                                    {% else %}
+                                        <i class="fas fa-award"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="podium-user">
+                                    <div class="avatar">{{ report.user.username|slice:":1" }}</div>
+                                    <p style="{% if forloop.counter == 1 %}font-size: 1.125rem; font-weight: 600;{% endif %}">
+                                        {{ report.user.get_full_name }}
+                                    </p>
+                                    <span>{{ report.score }}</span>
+                                </div>
+                            </div>
+                        {% empty %}
+                            <p>هیچ کاربری برای نمایش وجود ندارد.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            
+
+            <div class="card">
+                <div class="card-header">
+                    <h3>
+                        <i class="fas fa-users"></i>
+                        رنکینگ کلی
+                    </h3>
+                </div>
+                <div class="card-content">
+                    {% for report in reports %}
+                        <div class="ranking-item {% if forloop.counter <= 3 %}top-3{% endif %}">
+                            <div class="rank-badge {% if forloop.counter == 1 %}first{% elif forloop.counter == 2 %}second{% elif forloop.counter == 3 %}third{% endif %}">
+                                {% if forloop.counter == 1 %}
+                                    <i class="fas fa-crown"></i>
+                                {% elif forloop.counter == 2 %}
+                                    <i class="fas fa-medal"></i>
+                                {% elif forloop.counter == 3 %}
+                                    <i class="fas fa-award"></i>
+                                {% endif %}
+                                #{{ forloop.counter }}
+                            </div>
+                            <div class="user-info">
+                                <div class="avatar">{{ report.user.username|slice:":1" }}</div>
+                                <span class="name" style="font-weight: 600;">{{ report.user.get_full_name }}</span>
+                            </div>
+                            <div class="user-stats">
+                                <div class="stat">
+                                    <div class="value">{{ report.score }}</div>
+                                    <div class="label">نمره کل</div>
+                                </div>
+                                <div class="stat">
+                                    <div class="value">{{ report.user.quizresult.count }}</div>
+                                    <div class="label">آزمون</div>
+                                </div>
+
+                            </div>
+                        </div>
+                    {% empty %}
+                        <p>هیچ رکوردی برای نمایش وجود ندارد.</p>
+                    {% endfor %}
+                </div>
+            </div>
+            
+
+            <!-- Stats Overview -->
+            <div class="grid grid-3">
+                <div class="card">
+                    <div class="card-content text-center">
+                        <i class="fas fa-users" style="font-size: 2rem; color: var(--primary); margin-bottom: 0.5rem;"></i>
+                        <div style="font-size: 1.5rem; font-weight: 600; margin-bottom: 0.25rem;">۸</div>
+                        <div style="font-size: 0.875rem; color: var(--muted-foreground);">کل شرکت‌کنندگان</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-content text-center">
+                        <i class="fas fa-chart-line" style="font-size: 2rem; color: var(--green); margin-bottom: 0.5rem;"></i>
+                        <div style="font-size: 1.5rem; font-weight: 600; margin-bottom: 0.25rem;">۸۶%</div>
+                        <div style="font-size: 0.875rem; color: var(--muted-foreground);">میانگین نمرات</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-content text-center">
+                        <i class="fas fa-star" style="font-size: 2rem; color: var(--orange); margin-bottom: 0.5rem;"></i>
+                        <div style="font-size: 1.5rem; font-weight: 600; margin-bottom: 0.25rem;">۱۵</div>
+                        <div style="font-size: 0.875rem; color: var(--muted-foreground);">بالاترین استریک</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- User Type Switcher -->
+
+
+    <script src="{% static "js/navigation.js" %}"></script>
+</body>
+</html>

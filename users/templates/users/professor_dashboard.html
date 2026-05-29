@@ -1,0 +1,158 @@
+
+<!DOCTYPE html>
+{% load static%}
+{% load widget_tweaks %}
+
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>داشبورد - آزمون آنلاین</title>
+    <link rel="stylesheet" href="{% static 'css/shared.css'%}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <a href="home.html" class="logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-book-open"></i>
+                    </div>
+                    <span class="logo-text">آزمون آنلاین</span>
+                </a>
+                
+                <nav class="nav">
+                    <a href="home.html" class="nav-link">
+                        <i class="fas fa-home"></i>
+                        صفحه اصلی
+                    </a>
+                    <a href="dashboard.html" class="nav-link">
+                        <i class="fas fa-user"></i>
+                        <span id="dashboard-text">داشبورد استاد</span>
+                    </a>
+                    <a href="{% url 'quizes' %}" class="nav-link">
+                        <i class="fas fa-book-open"></i>
+                        آزمون‌ها
+                    </a>
+                    <a href="{%url 'ranking'%}" class="nav-link">
+                        <i class="fas fa-trophy"></i>
+                        رنکینگ
+                    </a>
+                </nav>
+
+                <div class="user-profile">
+                    <span class="user-badge" id="user-type-badge">استاد</span>
+                    <div class="avatar">
+                        <span id="user-avatar-text">د</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="main">
+        <div class="container">
+            
+                <div class="flex justify-between items-center mb-6">
+                    <h1 style="font-size: 2rem;">پنل استاد</h1>
+                    <button class="btn btn-primary" onclick='openCreateModal()'>
+                        <i class="fas fa-plus"></i>
+                        آزمون جدید
+                    </button>
+
+                </div>
+
+                <div id="createModal" class="modal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3 class="modal-title" id="modalTitle">➕ ایجاد آزمون جدید</h3>
+                            <button class="close-btn" onclick="closeCreateModal()">&times;</button>
+                        </div>
+                        <div id="modalFormContainer">
+                            <!-- فرم اینجا با fetch از view GET لود می‌شود -->
+                        </div>
+                        
+                    
+                    </div>
+                </div>
+
+                
+
+                <!-- Teacher Stats -->
+                <div class="grid grid-3 mb-6">
+                    <div class="stat-card">
+                        <div class="stat-content">
+                            <div class="stat-info">
+                                <p>کل آزمون‌ها</p>
+                                <h3>{{quizes.number}}</h3>
+                            </div>
+                            <i class="fas fa-book-open"></i>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-content">
+                            <div class="stat-info">
+                                <p>آزمون‌های فعال</p>
+                                <h3>{{quizes.number}}</h3>
+                            </div>
+                            <i class="fas fa-clock" style="color: var(--green);"></i>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-content">
+                            <div class="stat-info">
+                                <p>کل شرکت‌کنندگان</p>
+                                <h3>{{quizes.total_participation}}</h3>
+                            </div>
+                            <i class="fas fa-users" style="color: var(--blue);"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Exams List -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>آزمون‌های من</h3>
+                    </div>
+                    <div class="card-content">
+                        {%for quiz in quizes%}
+                        <div class="exam-item">
+                            <div>
+                                <div class="flex items-center gap-3 mb-2">
+                                    <h4 style="font-size: 1.125rem;">{{quiz.title}}</h4>
+                                    <span class="badge badge-success">فعال</span>
+                                </div>
+                                <div class="flex gap-6 text-sm" style="color: var(--muted-foreground);">
+                                    <span><i class="fas fa-clock"></i> {{quiz.time}}</span>
+                                    <span><i class="fas fa-users"></i> {{quiz.participation}} شرکت‌کننده</span>
+                                </div>
+                            </div>
+                            <div class="flex gap-2">
+                                <button type="button"class="btn btn-outline btn-sm"onclick="openEditModal({{ quiz.pk }})">
+                                <i class="fas fa-edit"></i>
+                                </button>
+                        
+                                <form method="POST" action="{% url 'delete_quiz' quiz.pk %}">
+                                    {% csrf_token %}
+                                <button type='submit' class="btn btn-outline btn-sm">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                                </form>
+                            </div>
+                        </div>
+                        {% endfor %}  
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="{% static 'js/navigation.js'%}"></script>
+    <script src="{% static 'js/professor_dashboard.js'%}"></script>
+    <script src="{% static 'js/create_quiz.js'%}"></script>
+
+</body>
+</html>

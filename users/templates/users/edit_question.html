@@ -1,0 +1,23 @@
+{% load static %}
+{% load widget_tweaks %}
+<form method="POST" action="{% url 'edit_question' question.id %}">
+    {% csrf_token %}
+    <div>
+        <label>متن سوال</label>
+        {{ question_form.title|add_class:"form-input"|attr:"required" }}
+    </div>
+
+    <div>
+        <label>گزینه‌ها</label>
+        {{ option_formset.management_form }}
+        {% for form in option_formset %}
+            <div>
+                {{ form.text|add_class:"form-input" }}
+                {{ form.is_answer }}
+            </div>
+        {% endfor %}
+    </div>
+
+    <button type="submit">ذخیره تغییرات</button>
+    <a href="{% url 'edit_quiz' quiz.pk %}">بازگشت</a>
+</form>

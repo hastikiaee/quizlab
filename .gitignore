@@ -1,0 +1,51 @@
+# --- تنظیمات پایتون ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.env
+.venv
+pip-log.txt
+pip-delete-this-directory.txt
+
+# --- تنظیمات اختصاصی جنگو ---
+# فایل‌های استاتیک نهایی (تولید شده توسط collectstatic)
+static/
+staticfiles/
+
+# فایل‌های آپلودی توسط کاربر (Media)
+media/
+
+# فایل‌های دیتابیس محلی (مثل SQLite)
+db.sqlite3
+db.sqlite3-journal
+
+# لاگ‌های جنگو
+*.log
+
+# --- تنظیمات محیطی (بسیار مهم: حاوی پسوردها و کلیدهای مخفی) ---
+.env
+.flaskenv
+
+# --- تنظیمات IDE و سیستم‌عامل ---
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+
+# --- تست و پوشش کد ---
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+pytest_cache/
+nosetests.xml
+coverage.xml
+*.cover

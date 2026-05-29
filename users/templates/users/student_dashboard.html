@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+{%load static %}
+{% load student_dashboard %}
+{% avg as result %}
+{% quiz_results as quizresults %}
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>داشبورد - آزمون آنلاین</title>
+    <link rel="stylesheet" href="{% static 'css/shared.css' %}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    {% include 'users/navbar.html' %}
+    
+
+    <main class="main">
+        <div class="container">
+            <!-- Student Dashboard -->
+            <div id="student-dashboard">
+                <!-- Stats Cards -->
+                <div class="grid grid-4 mb-6">
+                    <div class="stat-card streak">
+                        <div class="stat-content">
+                            <div class="stat-info">
+                                <p>استریک فعلی</p>
+                                <h3>۷ روز</h3>
+                            </div>
+                            <i class="fas fa-fire" style="color: var(--orange);"></i>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-content">
+                            <div class="stat-info">
+                                <p>کل آزمون‌ها</p>
+                                <h3>{{result.1}}</h3>
+                            </div>
+                            <i class="fas fa-book-open"></i>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-content">
+                            <div class="stat-info">
+                                <p>میانگین نمره</p>
+                                <h3>{{result.0}}</h3>
+                            </div>
+                            <i class="fas fa-trophy" style="color: var(--yellow);"></i>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-content">
+                            <div class="stat-info">
+                                <p>رنک کلی</p>
+                                <h3>{%rank%}</h3>
+                            </div>
+                            <i class="fas fa-check-circle" style="color: var(--green);"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Report Cards -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>
+                            <i class="fas fa-book-open"></i>
+                            کارنامه‌های من
+                        </h3>
+                    </div>
+                    <div class="card-content">
+
+                        {%for quizresult in quizresults %}
+                            <div class="report-card" onclick="viewReportDetails({{ quizresult.id }})">
+                            
+                                <div class="report-header">
+                                    <h4>{{quizresult.quiz.title}}</h4>
+                                    <span class="badge badge-success">{{quizresult.percent}}%</span>
+                                </div>
+                                <div class="report-details">
+                                    <div class="detail-item">
+                                        <i class="fas fa-calendar"></i>
+                                        {{quizresult.date_time|date:"Y/m/d"}}
+                                    </div>
+                                    <div class="detail-item">
+                                        <i class="fas fa-clock"></i>
+                                        {{quizresult.time}}
+                                    </div>
+                                    <div class="detail-item">
+                                        <i class="fas fa-check-circle"></i>
+                                        {{quizresult.score}}/{{quizresult.num_questions}}
+                                    </div>
+                                    <div class="detail-item">
+                                        <i class="fas fa-trophy"></i>
+                                        {{quizresult.rank}}/{{quizresult.total_participation}}
+                                    </div>
+                                </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: {{quizresult.percent}}%"></div>
+                            </div>
+                            <button class="btn btn-outline btn-sm">مشاهده جزئیات</button>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- User Type Switcher -->
+
+    <script>
+        const djangoUrls = {
+            reportDetail: "{% url 'quizresult_detail' pk=0 %}"
+        };
+    </script>
+    <script src="{%static 'js/navigation.js'%}"></script>
+    <script>
+        // Dashboard specific functionality
+        function updateDashboardContent() {
+            const studentDashboard = document.getElementById('student-dashboard');
+            const teacherPanel = document.getElementById('teacher-panel');
+            const dashboardText = document.getElementById('dashboard-text');
+            
+            if (userType === 'student') {
+                studentDashboard.classList.remove('hidden');
+                teacherPanel.classList.add('hidden');
+                dashboardText.textContent = 'داشبورد دانشجو';
+            } else {
+                studentDashboard.classList.add('hidden');
+                teacherPanel.classList.remove('hidden');
+                dashboardText.textContent = 'پنل استاد';
+            }
+        }
+
+        function showCreateExam() {
+            alert('ایجاد آزمون جدید - این قابلیت در نسخه نمایشی فعال نیست');
+        }
+
+        // Exam item styling
+        const examItems = document.querySelectorAll('.exam-item');
+        examItems.forEach(item => {
+            item.style.display = 'flex';
+            item.style.alignItems = 'center';
+            item.style.justifyContent = 'space-between';
+            item.style.padding = '1rem';
+            item.style.border = '1px solid var(--border)';
+            item.style.borderRadius = 'var(--radius)';
+            item.style.marginBottom = '1rem';
+        });
+
+        // Initialize dashboard on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateDashboardContent();
+        });
+    </script>
+</body>
+</html>

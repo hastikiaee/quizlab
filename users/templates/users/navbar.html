@@ -1,0 +1,41 @@
+
+<header class="header">
+
+
+    <div class="container">
+        <div class="header-content">
+            <a href="home.html" class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-book-open"></i>
+                </div>
+                <span class="logo-text">آزمون آنلاین</span>
+            </a>
+            
+            <nav class="nav">
+                <a href="home.html" class="nav-link">
+                    <i class="fas fa-home"></i>
+                    صفحه اصلی
+                </a>
+                <a href="{% url 'student_dashboard' %}" class="nav-link">
+                    <i class="fas fa-user"></i>
+                    <span id="dashboard-text">داشبورد دانشجو</span>
+                </a>
+                <a href="{% url 'quizes' %}" class="nav-link">
+                    <i class="fas fa-book-open"></i>
+                    آزمون‌ها
+                </a>
+                <a href="{%url 'ranking'%}" class="nav-link">
+                    <i class="fas fa-trophy"></i>
+                    رنکینگ
+                </a>
+            </nav>
+
+            <div class="user-profile">
+                <span class="user-badge" id="user-type-badge">دانشجو</span>
+                <div class="avatar">
+                    <span id="user-avatar-text">د</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>

@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <title>خروج</title>
+</head>
+<body>
+    <h1>آیا می‌خواهید خارج شوید؟</h1>
+    <form action="{% url 'logout' %}" method="post">
+        {% csrf_token %}
+        <button type="submit">خروج</button>
+    </form>
+</body>
+</html>

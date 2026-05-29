@@ -1,0 +1,72 @@
+{% load static %}
+{% load widget_tweaks %}
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'css/shared.css'%}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="modal-content">
+    <div class="modal-header">
+        <h3 class="modal-title">✏️ ویرایش آزمون</h3>
+        <button class="close-btn" onclick="closeEditModal()">×</button>
+    </div>
+    
+    <form id="editQuizForm" method="POST" action="{% url 'edit_quiz' quiz.pk %}">
+        {% csrf_token %}
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">عنوان آزمون</label>
+                {{ quiz_form.title|add_class:"form-input"|attr:"id:editQuizTitle"|attr:"required" }}
+            </div>
+            <div class="form-group">
+                <label class="form-label">زمان</label>
+                {{ quiz_form.time|add_class:"form-input"|attr:"id:quizDuration"|attr:"required" }}
+            </div>
+        </div>
+
+        <div class="question-manager">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h4>📝 مدیریت سوالات (<span id="editQuestionCountDisplay">{{ questions|length }}</span> سوال)</h4>
+                <button type="button" class="btn btn-sm" onclick="addQuestion()">➕ سوال جدید</button>
+            </div>
+        
+            <div id="editQuestionsList">
+                {% for question in questions %}
+                <div class="question-item" data-question-id="{{ question.id }}">
+                    <div class="question-text">{{ question.title }}</div>
+                    <ul>
+
+                        <li>
+                            {{question.correct_option}}
+                        </li>
+    
+                    </ul>
+                    <a class="btn btn-outline btn-sm"  href="{% url 'edit_question' question.id %}">✏️ ویرایش</a>
+                    <button type="button" onclick="deleteQuestionExisting({{ question.id }})">🗑️ حذف</button>
+                </div>
+                {% endfor %}
+            </div>
+        
+            <!-- ادیتور سوالات جدید -->
+            <div id="editQuestionEditor" style="display:none;">
+                <input type="text" id="editQuestionText" placeholder="متن سوال">
+                <div id="editOptionsContainer"></div>
+                <button type="button" onclick="saveEditQuestion()">✅ ذخیره سوال</button>
+                <button type="button" onclick="cancelEditQuestion()">انصراف</button>
+            </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
+            <button type="button" class="btn btn-outline" onclick="closeEditModal()">انصراف</button>
+            <button type="submit" class="btn">ذخیره تغییرات</button>
+        </div>
+    </form>
+</div>
+
+<!-- فایل اسکریپت حتماً بعد از همه‌ی عناصر HTML -->
+<script src="{% static 'js/edit_quiz.js'%}"></script>
+</body>
+</html>
